@@ -22,6 +22,11 @@
         <div class="step-line"></div>
         <div class="step-item" data-step="3">
             <div class="step-circle">3</div>
+            <div class="step-label">Penjamin</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" data-step="4">
+            <div class="step-circle">4</div>
             <div class="step-label">Konfirmasi</div>
         </div>
     </div>
@@ -32,47 +37,87 @@
 
         {{-- Step 1: Data Pasien --}}
         <div class="form-step" id="step-1" style="padding: 16px;">
-            <h2 style="font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--color-gray-800);">Data Pasien</h2>
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--color-gray-900);">Data Pasien</h2>
+            <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 20px;">Lengkapi identitas pasien yang akan dirawat.</p>
 
+            {{-- Patient Status --}}
             <div class="form-group">
-                <label class="form-label">Nama Lengkap <span class="required">*</span></label>
-                <input type="text" name="full_name" class="form-input @error('full_name') error @enderror" value="{{ old('full_name') }}" required>
-                @error('full_name') <div class="form-error">{{ $message }}</div> @enderror
+                <label class="option-card selected" id="inpStatusBaru" onclick="selectInpStatus('baru')">
+                    <input type="radio" name="patient_status" value="baru" checked>
+                    <div class="option-radio"></div>
+                    <div class="option-content">
+                        <h4>Pasien Baru</h4>
+                        <p>Belum pernah terdaftar di RS Santa Anna</p>
+                    </div>
+                </label>
+                <label class="option-card" id="inpStatusLama" onclick="selectInpStatus('lama')">
+                    <input type="radio" name="patient_status" value="lama">
+                    <div class="option-radio"></div>
+                    <div class="option-content">
+                        <h4>Pasien Lama</h4>
+                        <p>Sudah memiliki nomor rekam medis</p>
+                    </div>
+                </label>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">NIK <span class="required">*</span></label>
-                <input type="text" name="nik" class="form-input @error('nik') error @enderror" value="{{ old('nik') }}" maxlength="16" pattern="[0-9]{16}" inputmode="numeric" required>
-                <div class="form-help">Masukkan 16 digit Nomor Induk Kependudukan</div>
-                @error('nik') <div class="form-error">{{ $message }}</div> @enderror
+            {{-- MR Lookup for pasien lama --}}
+            <div id="inpLamaSection" style="display: none;">
+                <div style="background: var(--color-primary-50); border: 1px solid var(--color-primary-200); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Nomor Rekam Medis <span class="required">*</span></label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" name="medical_record_number" class="form-input" placeholder="Contoh: RM-001234" style="flex: 1;">
+                            <button type="button" class="btn btn-primary btn-sm">Cari</button>
+                        </div>
+                        <div class="form-help">Masukkan nomor RM dari kartu pasien</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Nomor HP <span class="required">*</span></label>
-                <input type="tel" name="phone" class="form-input @error('phone') error @enderror" value="{{ old('phone') }}" inputmode="tel" required>
-                @error('phone') <div class="form-error">{{ $message }}</div> @enderror
-            </div>
+            {{-- Patient info form --}}
+            <div id="inpBaruSection">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+                        <input type="text" name="full_name" class="form-input @error('full_name') error @enderror" value="{{ old('full_name') }}" required>
+                        @error('full_name') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NIK <span class="required">*</span></label>
+                        <input type="text" name="nik" class="form-input @error('nik') error @enderror" value="{{ old('nik') }}" maxlength="16" pattern="[0-9]{16}" inputmode="numeric" required>
+                        <div class="form-help">16 digit NIK KTP</div>
+                        @error('nik') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Tanggal Lahir <span class="required">*</span></label>
-                <input type="date" name="birth_date" class="form-input @error('birth_date') error @enderror" value="{{ old('birth_date') }}" required>
-                @error('birth_date') <div class="form-error">{{ $message }}</div> @enderror
-            </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nomor HP <span class="required">*</span></label>
+                        <input type="tel" name="phone" class="form-input @error('phone') error @enderror" value="{{ old('phone') }}" inputmode="tel" required>
+                        @error('phone') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Lahir <span class="required">*</span></label>
+                        <input type="date" name="birth_date" class="form-input @error('birth_date') error @enderror" value="{{ old('birth_date') }}" required>
+                        @error('birth_date') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
-                <select name="gender" class="form-select @error('gender') error @enderror" required>
-                    <option value="">Pilih jenis kelamin</option>
-                    <option value="L" {{ old('gender') === 'L' ? 'selected' : '' }}>Laki-laki</option>
-                    <option value="P" {{ old('gender') === 'P' ? 'selected' : '' }}>Perempuan</option>
-                </select>
-                @error('gender') <div class="form-error">{{ $message }}</div> @enderror
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
+                    <select name="gender" class="form-select @error('gender') error @enderror" required>
+                        <option value="">Pilih jenis kelamin</option>
+                        <option value="L" {{ old('gender') === 'L' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="P" {{ old('gender') === 'P' ? 'selected' : '' }}>Perempuan</option>
+                    </select>
+                    @error('gender') <div class="form-error">{{ $message }}</div> @enderror
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Alamat <span class="required">*</span></label>
-                <textarea name="address" class="form-textarea @error('address') error @enderror" rows="3" required>{{ old('address') }}</textarea>
-                @error('address') <div class="form-error">{{ $message }}</div> @enderror
+                <div class="form-group">
+                    <label class="form-label">Alamat <span class="required">*</span></label>
+                    <textarea name="address" class="form-textarea @error('address') error @enderror" rows="3" required>{{ old('address') }}</textarea>
+                    @error('address') <div class="form-error">{{ $message }}</div> @enderror
+                </div>
             </div>
 
             <button type="button" class="btn btn-primary btn-block btn-lg" onclick="goToStep(2)">Lanjutkan</button>
@@ -80,34 +125,8 @@
 
         {{-- Step 2: Perawatan --}}
         <div class="form-step" id="step-2" style="padding: 16px; display: none;">
-            <h2 style="font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--color-gray-800);">Informasi Perawatan</h2>
-
-            <div class="form-group">
-                <label class="form-label">Jenis Pasien <span class="required">*</span></label>
-                <label class="option-card" id="patientTypeUmum" onclick="selectPatientType('umum')">
-                    <input type="radio" name="patient_type" value="umum" {{ old('patient_type', 'umum') === 'umum' ? 'checked' : '' }} required>
-                    <div class="option-radio"></div>
-                    <div class="option-content">
-                        <h4>Pasien Umum</h4>
-                        <p>Tanpa menggunakan asuransi</p>
-                    </div>
-                </label>
-                <label class="option-card" id="patientTypeAsuransi" onclick="selectPatientType('asuransi')">
-                    <input type="radio" name="patient_type" value="asuransi" {{ old('patient_type') === 'asuransi' ? 'checked' : '' }}>
-                    <div class="option-radio"></div>
-                    <div class="option-content">
-                        <h4>Asuransi</h4>
-                        <p>Menggunakan asuransi kesehatan</p>
-                    </div>
-                </label>
-            </div>
-
-            {{-- Dynamic insurance field --}}
-            <div class="form-group" id="insuranceField" style="display: none;">
-                <label class="form-label">Nama Asuransi <span class="required">*</span></label>
-                <input type="text" name="insurance_name" class="form-input" value="{{ old('insurance_name') }}">
-                @error('insurance_name') <div class="form-error">{{ $message }}</div> @enderror
-            </div>
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--color-gray-900);">Informasi Perawatan</h2>
+            <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 20px;">Pilih kelas perawatan dan informasi rawat inap.</p>
 
             <div class="form-group">
                 <label class="form-label">Kelas Perawatan <span class="required">*</span></label>
@@ -122,8 +141,18 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Keperluan / Keterangan</label>
-                <textarea name="notes" class="form-textarea" rows="3" placeholder="Jelaskan keperluan rawat inap Anda">{{ old('notes') }}</textarea>
+                <label class="form-label">Dokter yang Merujuk</label>
+                <input type="text" name="referring_doctor" class="form-input" value="{{ old('referring_doctor') }}" placeholder="Nama dokter yang memberikan rujukan">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Diagnosa Awal / Keperluan</label>
+                <textarea name="notes" class="form-textarea" rows="3" placeholder="Jelaskan alasan atau keperluan rawat inap">{{ old('notes') }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Kontak Penanggung Jawab</label>
+                <input type="text" name="guardian_contact" class="form-input" value="{{ old('guardian_contact') }}" placeholder="Nama & nomor HP penanggung jawab pasien">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -132,12 +161,68 @@
             </div>
         </div>
 
-        {{-- Step 3: Konfirmasi --}}
+        {{-- Step 3: Penjamin --}}
         <div class="form-step" id="step-3" style="padding: 16px; display: none;">
-            <h2 style="font-size: 17px; font-weight: 700; margin-bottom: 16px; color: var(--color-gray-800);">Konfirmasi Data</h2>
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--color-gray-900);">Asuransi &amp; Penjamin</h2>
+            <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 20px;">Pilih jenis penjamin biaya rawat inap.</p>
 
-            <div style="background: var(--color-gray-50); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+            <div class="form-group">
+                <label class="option-card" id="payUmum" onclick="selectInpPayment('umum')">
+                    <input type="radio" name="patient_type" value="umum" {{ old('patient_type', 'umum') === 'umum' ? 'checked' : '' }} required>
+                    <div class="option-radio"></div>
+                    <div class="option-content">
+                        <h4>Umum / Mandiri</h4>
+                        <p>Membayar biaya secara mandiri</p>
+                    </div>
+                </label>
+
+                <label class="option-card" id="payAsuransi" onclick="selectInpPayment('asuransi')">
+                    <input type="radio" name="patient_type" value="asuransi" {{ old('patient_type') === 'asuransi' ? 'checked' : '' }}>
+                    <div class="option-radio"></div>
+                    <div class="option-content">
+                        <h4>Asuransi Swasta</h4>
+                        <p>Menggunakan asuransi kesehatan swasta</p>
+                    </div>
+                </label>
+            </div>
+
+            {{-- Insurance fields --}}
+            <div id="inpInsuranceFields" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Nama Asuransi / Penjamin <span class="required">*</span></label>
+                    <input type="text" name="insurance_name" class="form-input" value="{{ old('insurance_name') }}" id="inpInsuranceName">
+                    @error('insurance_name') <div class="form-error">{{ $message }}</div> @enderror
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nomor Peserta / Polis <span class="required">*</span></label>
+                    <input type="text" name="insurance_number" class="form-input" value="{{ old('insurance_number') }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nomor Surat Jaminan</label>
+                    <input type="text" name="insurance_referral" class="form-input" value="{{ old('insurance_referral') }}" placeholder="Opsional">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn btn-outline btn-block" onclick="goToStep(2)">Kembali</button>
+                <button type="button" class="btn btn-primary btn-block" onclick="goToStep(4)">Lanjutkan</button>
+            </div>
+        </div>
+
+        {{-- Step 4: Konfirmasi --}}
+        <div class="form-step" id="step-4" style="padding: 16px; display: none;">
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--color-gray-900);">Konfirmasi Data</h2>
+            <p style="font-size: 13px; color: var(--color-gray-500); margin-bottom: 20px;">Periksa kembali data sebelum mengirim.</p>
+
+            <div style="background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
                 <div id="confirmationSummary"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="consent" id="inpConsentCheckbox" required>
+                    <span>Saya menyatakan bahwa data yang saya isi adalah benar dan saya menyetujui penggunaan data ini untuk proses pendaftaran rawat inap di RS Santa Anna.</span>
+                </label>
             </div>
 
             <div class="notice-banner" style="margin: 0 0 16px;">
@@ -145,8 +230,8 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button type="button" class="btn btn-outline btn-block" onclick="goToStep(2)">Kembali</button>
-                <button type="submit" class="btn btn-primary btn-block">Kirim Pendaftaran</button>
+                <button type="button" class="btn btn-outline btn-block" onclick="goToStep(3)">Kembali</button>
+                <button type="submit" class="btn btn-primary btn-block" id="inpSubmitBtn" disabled>Kirim Pendaftaran</button>
             </div>
         </div>
     </form>
@@ -174,16 +259,18 @@
             });
 
             currentStep = step;
-            if (step === 3) buildConfirmationSummary();
+            if (step === 4) buildConfirmationSummary();
             window.scrollTo(0, 0);
         }
 
         function validateStep(step) {
             const stepEl = document.getElementById('step-' + step);
-            const requiredFields = stepEl.querySelectorAll('[required]');
+            const requiredFields = stepEl.querySelectorAll('[required]:not([disabled])');
             let valid = true;
 
             requiredFields.forEach(field => {
+                if (field.type === 'checkbox') { if (!field.checked) valid = false; return; }
+                if (field.type === 'radio') { return; }
                 if (!field.value || field.value.trim() === '') {
                     field.classList.add('error');
                     valid = false;
@@ -200,21 +287,44 @@
             return valid;
         }
 
-        function selectPatientType(type) {
-            const insuranceField = document.getElementById('insuranceField');
-            const umumCard = document.getElementById('patientTypeUmum');
-            const asuransiCard = document.getElementById('patientTypeAsuransi');
+        function selectInpStatus(status) {
+            const lama = document.getElementById('inpLamaSection');
+            const baru = document.getElementById('inpBaruSection');
+            const lamaCard = document.getElementById('inpStatusLama');
+            const baruCard = document.getElementById('inpStatusBaru');
 
-            if (type === 'asuransi') {
-                insuranceField.style.display = 'block';
-                insuranceField.querySelector('input').setAttribute('required', 'required');
-                asuransiCard.classList.add('selected');
-                umumCard.classList.remove('selected');
+            if (status === 'lama') {
+                lama.style.display = 'block';
+                baru.style.display = 'none';
+                lamaCard.classList.add('selected');
+                baruCard.classList.remove('selected');
             } else {
-                insuranceField.style.display = 'none';
-                insuranceField.querySelector('input').removeAttribute('required');
-                umumCard.classList.add('selected');
-                asuransiCard.classList.remove('selected');
+                lama.style.display = 'none';
+                baru.style.display = 'block';
+                baruCard.classList.add('selected');
+                lamaCard.classList.remove('selected');
+            }
+        }
+
+        function selectInpPayment(type) {
+            const insuranceFields = document.getElementById('inpInsuranceFields');
+            document.querySelectorAll('#step-3 .option-card').forEach(card => {
+                const radio = card.querySelector('input[type="radio"]');
+                card.classList.toggle('selected', radio && radio.checked);
+            });
+            setTimeout(() => {
+                document.querySelectorAll('#step-3 .option-card').forEach(card => {
+                    const radio = card.querySelector('input[type="radio"]');
+                    card.classList.toggle('selected', radio && radio.checked);
+                });
+            }, 10);
+
+            if (type === 'umum') {
+                insuranceFields.style.display = 'none';
+                insuranceFields.querySelectorAll('input').forEach(f => f.removeAttribute('required'));
+            } else {
+                insuranceFields.style.display = 'block';
+                document.getElementById('inpInsuranceName').setAttribute('required', 'required');
             }
         }
 
@@ -222,14 +332,8 @@
             const form = document.getElementById('inpatientForm');
             const data = new FormData(form);
 
-            const roomClassMap = {
-                'vip': 'VIP',
-                'kelas_1': 'Kelas 1',
-                'kelas_2': 'Kelas 2',
-                'kelas_3': 'Kelas 3',
-            };
-
-            const patientType = data.get('patient_type') === 'asuransi' ? 'Asuransi' : 'Pasien Umum';
+            const roomClassMap = { 'vip': 'VIP', 'kelas_1': 'Kelas 1', 'kelas_2': 'Kelas 2', 'kelas_3': 'Kelas 3' };
+            const paymentMap = { 'umum': 'Umum / Mandiri', 'asuransi': 'Asuransi Swasta' };
 
             const rows = [
                 ['Nama Lengkap', data.get('full_name')],
@@ -237,40 +341,36 @@
                 ['No. HP', data.get('phone')],
                 ['Jenis Kelamin', data.get('gender') === 'L' ? 'Laki-laki' : 'Perempuan'],
                 ['Jenis Layanan', 'Rawat Inap'],
-                ['Jenis Pasien', patientType],
+                ['Kelas Perawatan', roomClassMap[data.get('room_class')] || '-'],
+                ['Jenis Penjamin', paymentMap[data.get('patient_type')] || '-'],
             ];
 
-            if (data.get('patient_type') === 'asuransi') {
+            if (data.get('patient_type') !== 'umum') {
                 rows.push(['Nama Asuransi', data.get('insurance_name') || '-']);
+                rows.push(['No. Peserta/Polis', data.get('insurance_number') || '-']);
             }
 
-            rows.push(['Kelas Perawatan', roomClassMap[data.get('room_class')] || '-']);
-
-            if (data.get('notes')) {
-                rows.push(['Keterangan', data.get('notes')]);
-            }
+            if (data.get('referring_doctor')) rows.push(['Dokter Perujuk', data.get('referring_doctor')]);
+            if (data.get('notes')) rows.push(['Keperluan', data.get('notes')]);
 
             let html = '';
             rows.forEach(([label, value]) => {
-                html += `
-                    <div class="confirmation-row">
-                        <span class="label">${label}</span>
-                        <span class="value">${value || '-'}</span>
-                    </div>
-                `;
+                html += `<div class="confirmation-row"><span class="label">${label}</span><span class="value">${value || '-'}</span></div>`;
             });
 
             document.getElementById('confirmationSummary').innerHTML = html;
         }
 
-        // Initialize
+        // Init
         document.addEventListener('DOMContentLoaded', function() {
+            selectInpStatus('baru');
             const checkedType = document.querySelector('input[name="patient_type"]:checked');
-            if (checkedType) {
-                selectPatientType(checkedType.value);
-            } else {
-                selectPatientType('umum');
-            }
+            if (checkedType) selectInpPayment(checkedType.value);
+            else selectInpPayment('umum');
+
+            document.getElementById('inpConsentCheckbox').addEventListener('change', function() {
+                document.getElementById('inpSubmitBtn').disabled = !this.checked;
+            });
         });
     </script>
     @endpush

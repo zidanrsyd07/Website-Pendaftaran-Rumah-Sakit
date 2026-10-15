@@ -9,7 +9,7 @@
     <meta name="description" content="@yield('description', 'Website resmi RS Santa Anna. Akses layanan rumah sakit, daftar berobat, cari dokter, dan lihat antrian melalui smartphone.')">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&family=inter:400,500,600,700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

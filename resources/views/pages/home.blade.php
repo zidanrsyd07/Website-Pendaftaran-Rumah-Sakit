@@ -5,23 +5,47 @@
 
 @section('content')
     {{-- ════════════════════════════════════════════════
-       HERO: Split layout (text left, image right)
+       HERO: Navy gradient, split layout (text left, image right)
        ════════════════════════════════════════════════ --}}
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <div class="hero-label">Selamat Datang di RS Santa Anna</div>
-                <h1>Pelayanan<br>Terbaik.<br><span>Setiap Saat.</span></h1>
-                <p class="hero-desc">Pelayanan kesehatan berkualitas dengan teknologi modern dan dokter berpengalaman. Kesehatan Anda adalah prioritas utama kami.</p>
+                <div class="hero-label">RS Santa Anna — Rumah Sakit Terpercaya</div>
+                <h1>Pendaftaran<br>Mudah &amp; Cepat.<br><span>Tanpa Antri.</span></h1>
+                <p class="hero-desc">Daftar berobat secara online kapan saja. Pilih dokter, jadwal kunjungan, dan layanan yang Anda butuhkan dari rumah.</p>
                 <div class="hero-buttons">
                     <a href="{{ route('registration.select-type') }}" class="btn btn-primary btn-lg">
-                        Daftar Berobat
+                        Mulai Pendaftaran
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                     </a>
-                    <a href="{{ route('polyclinics.index') }}" class="btn btn-white btn-lg">
-                        Layanan Kami
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    <a href="{{ route('queue.index') }}" class="btn btn-outline-white btn-lg">
+                        Cek Status Pendaftaran
                     </a>
+                </div>
+
+                {{-- Service quick-select panel --}}
+                <div class="hero-services-panel">
+                    <h4>Pilih Layanan</h4>
+                    <div class="hero-service-cards">
+                        <a href="{{ route('registration.outpatient') }}" class="hero-service-card">
+                            <div class="hsc-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.375 12.375 0 0110.375 21c-2.31 0-4.473-.637-6.375-1.765z"/></svg>
+                            </div>
+                            <div>
+                                <h5>Rawat Jalan</h5>
+                                <p>Konsultasi &amp; pemeriksaan</p>
+                            </div>
+                        </a>
+                        <a href="{{ route('registration.inpatient') }}" class="hero-service-card">
+                            <div class="hsc-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+                            </div>
+                            <div>
+                                <h5>Rawat Inap</h5>
+                                <p>Pendaftaran rawat inap</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="hero-image">
@@ -75,9 +99,91 @@
     </section>
 
     {{-- ════════════════════════════════════════════════
-       SPECIALTIES: Poliklinik Cards
+       SERVICE CARDS: 6 layanan utama
        ════════════════════════════════════════════════ --}}
     <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Layanan Pendaftaran</div>
+                <h2>Akses Layanan Rumah Sakit<br>dengan Mudah</h2>
+                <p class="section-subtitle">Daftarkan diri Anda atau keluarga untuk berbagai layanan kesehatan RS Santa Anna secara online.</p>
+            </div>
+
+            <div class="service-grid">
+                <a href="{{ route('registration.outpatient') }}" class="service-card">
+                    <div class="svc-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.375 12.375 0 0110.375 21c-2.31 0-4.473-.637-6.375-1.765z"/></svg>
+                    </div>
+                    <h3>Pendaftaran Rawat Jalan</h3>
+                    <p>Daftar konsultasi dokter spesialis dan pemeriksaan kesehatan tanpa menginap.</p>
+                    <span class="svc-link">
+                        Daftar Sekarang
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+                <a href="{{ route('registration.inpatient') }}" class="service-card">
+                    <div class="svc-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+                    </div>
+                    <h3>Pendaftaran Rawat Inap</h3>
+                    <p>Pengajuan pendaftaran rawat inap sesuai prosedur dan persyaratan rumah sakit.</p>
+                    <span class="svc-link">
+                        Daftar Sekarang
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+                <a href="{{ route('polyclinics.index') }}" class="service-card">
+                    <div class="svc-icon">
+                        @include('components.icon', ['name' => 'stethoscope', 'size' => 24])
+                    </div>
+                    <h3>Informasi Poli</h3>
+                    <p>Lihat daftar poliklinik, jadwal dokter, dan layanan spesialis yang tersedia.</p>
+                    <span class="svc-link">
+                        Lihat Poli
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+                <a href="{{ route('registration.select-type') }}" class="service-card">
+                    <div class="svc-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                    </div>
+                    <h3>Informasi Asuransi</h3>
+                    <p>Ketahui asuransi dan penjamin yang bekerja sama dengan RS Santa Anna.</p>
+                    <span class="svc-link">
+                        Selengkapnya
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+                <a href="{{ route('registration.select-type') }}" class="service-card">
+                    <div class="svc-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                    </div>
+                    <h3>Panduan Pendaftaran</h3>
+                    <p>Langkah-langkah dan persyaratan yang perlu disiapkan sebelum mendaftar.</p>
+                    <span class="svc-link">
+                        Baca Panduan
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+                <a href="{{ route('queue.index') }}" class="service-card">
+                    <div class="svc-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                    </div>
+                    <h3>Cek Status Pendaftaran</h3>
+                    <p>Pantau status pendaftaran dan nomor antrean Anda secara real-time.</p>
+                    <span class="svc-link">
+                        Cek Status
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {{-- ════════════════════════════════════════════════
+       SPECIALTIES: Poliklinik Cards
+       ════════════════════════════════════════════════ --}}
+    <section class="section bg-gray">
         <div class="container">
             <div class="section-header row">
                 <div>
@@ -111,7 +217,7 @@
     {{-- ════════════════════════════════════════════════
        ABOUT SPLIT: Image + Text + Stats
        ════════════════════════════════════════════════ --}}
-    <section class="section bg-gray">
+    <section class="section">
         <div class="container">
             <div class="about-split">
                 <div class="about-image">
@@ -148,7 +254,7 @@
     {{-- ════════════════════════════════════════════════
        FACILITY INFO CARDS
        ════════════════════════════════════════════════ --}}
-    <section class="section">
+    <section class="section bg-gray">
         <div class="container">
             <div class="section-header row">
                 <div>
@@ -165,7 +271,7 @@
                 <div class="info-card">
                     <img src="/images/hospital-lobby.jpg" alt="Lobby RS Santa Anna" loading="lazy">
                     <div class="info-card-body">
-                        <h3>Fasilitas Modern & Nyaman</h3>
+                        <h3>Fasilitas Modern &amp; Nyaman</h3>
                         <p>Dilengkapi lobby luas, ruang tunggu nyaman, dan area parkir yang memadai untuk kenyamanan pasien dan keluarga.</p>
                     </div>
                 </div>
@@ -190,14 +296,13 @@
     {{-- ════════════════════════════════════════════════
        TESTIMONIALS
        ════════════════════════════════════════════════ --}}
-    <section class="section bg-gray">
+    <section class="section">
         <div class="container">
             <div class="section-header row">
                 <div>
                     <div class="section-label">Testimoni Pasien</div>
                     <h2>Dipercaya Ribuan Pasien</h2>
                 </div>
-                <a href="#" class="view-all">Lihat Semua Testimoni →</a>
             </div>
 
             <div class="testimonial-scroll">

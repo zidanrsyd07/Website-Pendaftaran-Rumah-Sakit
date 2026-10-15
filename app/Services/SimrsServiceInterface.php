@@ -29,4 +29,13 @@ interface SimrsServiceInterface
     public function getQueueStatus(int $polyclinicId, ?int $doctorId = null): array;
 
     public function getQueueByPatient(string $registrationNumber): ?array;
+
+    // Inpatient Rooms & Beds (SIMRS Core)
+    public function getRooms(array $filters = []): array;
+
+    public function getReadyBeds(?string $class = null): array;
+
+    public function getBedStatistics(): array;
+
+    public function assignBed(int $bedId, array $patientData): array;
 }

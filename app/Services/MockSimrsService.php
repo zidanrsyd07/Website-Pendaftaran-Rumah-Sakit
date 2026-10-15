@@ -15,11 +15,14 @@ class MockSimrsService implements SimrsServiceInterface
 
     private array $queues;
 
+    private array $beds;
+
     public function __construct()
     {
         $this->polyclinics = $this->loadPolyclinics();
         $this->doctors = $this->loadDoctors();
         $this->queues = $this->loadQueues();
+        $this->beds = $this->loadBeds();
     }
 
     public function getPolyclinics(): array
@@ -128,6 +131,110 @@ class MockSimrsService implements SimrsServiceInterface
             'status' => 'Menunggu',
             'polyclinic' => $this->getPolyclinic(1),
             'doctor' => $this->getDoctor(1),
+        ];
+    }
+
+    public function getRooms(array $filters = []): array
+    {
+        $beds = collect($this->beds);
+
+        if (! empty($filters['class'])) {
+            $class = strtolower($filters['class']);
+            $beds = $beds->filter(fn ($b) => strtolower($b['room_class']) === $class);
+        }
+
+        if (! empty($filters['status'])) {
+            $status = strtolower($filters['status']);
+            $beds = $beds->filter(fn ($b) => strtolower($b['status']) === $status);
+        }
+
+        if (! empty($filters['search'])) {
+            $search = strtolower($filters['search']);
+            $beds = $beds->filter(function ($b) use ($search) {
+                return str_contains(strtolower($b['room_name']), $search) ||
+                       str_contains(strtolower($b['bed_code']), $search) ||
+                       str_contains(strtolower($b['room_class']), $search);
+            });
+        }
+
+        return $beds->values()->all();
+    }
+
+    public function getReadyBeds(?string $class = null): array
+    {
+        $beds = collect($this->beds)->where('status', 'ready');
+
+        if ($class && strtolower($class) !== 'all') {
+            $classLower = strtolower($class);
+            $beds = $beds->filter(fn ($b) => strtolower($b['room_class']) === $classLower);
+        }
+
+        return $beds->values()->all();
+    }
+
+    public function getBedStatistics(): array
+    {
+        $beds = collect($this->beds);
+        $total = $beds->count();
+        $ready = $beds->where('status', 'ready')->count();
+        $occupied = $beds->where('status', 'occupied')->count();
+        $cleaning = $beds->where('status', 'cleaning')->count();
+        $maintenance = $beds->where('status', 'maintenance')->count();
+
+        $classes = ['VIP', 'Kelas 1', 'Kelas 2', 'Kelas 3', 'ICU', 'Isolasi'];
+        $byClass = [];
+
+        foreach ($classes as $cls) {
+            $classBeds = $beds->where('room_class', $cls);
+            $byClass[$cls] = [
+                'total' => $classBeds->count(),
+                'ready' => $classBeds->where('status', 'ready')->count(),
+                'occupied' => $classBeds->where('status', 'occupied')->count(),
+                'cleaning' => $classBeds->where('status', 'cleaning')->count(),
+            ];
+        }
+
+        return [
+            'total_beds' => $total,
+            'ready_beds' => $ready,
+            'occupied_beds' => $occupied,
+            'cleaning_beds' => $cleaning,
+            'maintenance_beds' => $maintenance,
+            'occupancy_rate' => $total > 0 ? round(($occupied / $total) * 100) : 0,
+            'by_class' => $byClass,
+        ];
+    }
+
+    public function assignBed(int $bedId, array $patientData): array
+    {
+        foreach ($this->beds as &$bed) {
+            if ($bed['id'] === $bedId) {
+                if ($bed['status'] !== 'ready') {
+                    return [
+                        'success' => false,
+                        'message' => 'Bed '.$bed['bed_code'].' tidak berstatus Ready (status saat ini: '.$bed['status'].').',
+                    ];
+                }
+
+                $bed['status'] = 'occupied';
+                $bed['patient'] = [
+                    'name' => $patientData['patient_name'] ?? 'Pasien',
+                    'registration_number' => $patientData['registration_number'] ?? null,
+                    'doctor_name' => $patientData['doctor_name'] ?? null,
+                    'assigned_at' => now()->toIso8601String(),
+                ];
+
+                return [
+                    'success' => true,
+                    'message' => 'Bed '.$bed['bed_code'].' ('.$bed['room_name'].') berhasil dialokasikan ke pasien.',
+                    'bed' => $bed,
+                ];
+            }
+        }
+
+        return [
+            'success' => false,
+            'message' => 'Bed tidak ditemukan di SIMRS.',
         ];
     }
 
@@ -355,6 +462,371 @@ class MockSimrsService implements SimrsServiceInterface
                 'served_patients' => 10,
                 'waiting_count' => 8,
                 'status' => 'Sedang Dilayani',
+            ],
+        ];
+    }
+
+    private function loadBeds(): array
+    {
+        return [
+            // === VIP (Paviliun Santa Anna - Lt. 2) ===
+            [
+                'id' => 1,
+                'bed_code' => 'VIP-201-A',
+                'room_name' => 'Paviliun Santa Anna 201',
+                'room_class' => 'VIP',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 750000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Smart TV 43"', 'Kamar Mandi Dalam', 'Kulkas', 'Sofa Bed Penunggu', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 2,
+                'bed_code' => 'VIP-202-A',
+                'room_name' => 'Paviliun Santa Anna 202',
+                'room_class' => 'VIP',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 750000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Smart TV 43"', 'Kamar Mandi Dalam', 'Kulkas', 'Sofa Bed Penunggu', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 3,
+                'bed_code' => 'VIP-203-A',
+                'room_name' => 'Paviliun Santa Anna 203',
+                'room_class' => 'VIP',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 750000,
+                'status' => 'occupied',
+                'facilities' => ['AC', 'Smart TV 43"', 'Kamar Mandi Dalam', 'Kulkas', 'Sofa Bed Penunggu', 'Oksigen Central', 'Nurse Call'],
+                'patient' => ['name' => 'Bambang Hermanto', 'doctor_name' => 'dr. Ahmad Fauzi, Sp.PD'],
+            ],
+            [
+                'id' => 4,
+                'bed_code' => 'VIP-204-A',
+                'room_name' => 'Paviliun Santa Anna 204',
+                'room_class' => 'VIP',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 750000,
+                'status' => 'cleaning',
+                'facilities' => ['AC', 'Smart TV 43"', 'Kamar Mandi Dalam', 'Kulkas', 'Sofa Bed Penunggu', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 5,
+                'bed_code' => 'VIP-205-A',
+                'room_name' => 'Paviliun Santa Anna 205',
+                'room_class' => 'VIP',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 750000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Smart TV 43"', 'Kamar Mandi Dalam', 'Kulkas', 'Sofa Bed Penunggu', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+
+            // === KELAS 1 (Paviliun Maria - Lt. 3) ===
+            [
+                'id' => 6,
+                'bed_code' => 'K1-301-A',
+                'room_name' => 'Paviliun Maria 301',
+                'room_class' => 'Kelas 1',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 450000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'TV LED 32"', 'Kamar Mandi Dalam', 'Tirai Pembatas', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 7,
+                'bed_code' => 'K1-301-B',
+                'room_name' => 'Paviliun Maria 301',
+                'room_class' => 'Kelas 1',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 450000,
+                'status' => 'occupied',
+                'facilities' => ['AC', 'TV LED 32"', 'Kamar Mandi Dalam', 'Tirai Pembatas', 'Oksigen Central', 'Nurse Call'],
+                'patient' => ['name' => 'Siti Nurhaliza', 'doctor_name' => 'dr. Hendra Wijaya, Sp.OG'],
+            ],
+            [
+                'id' => 8,
+                'bed_code' => 'K1-302-A',
+                'room_name' => 'Paviliun Maria 302',
+                'room_class' => 'Kelas 1',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 450000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'TV LED 32"', 'Kamar Mandi Dalam', 'Tirai Pembatas', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 9,
+                'bed_code' => 'K1-302-B',
+                'room_name' => 'Paviliun Maria 302',
+                'room_class' => 'Kelas 1',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 450000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'TV LED 32"', 'Kamar Mandi Dalam', 'Tirai Pembatas', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 10,
+                'bed_code' => 'K1-303-A',
+                'room_name' => 'Paviliun Maria 303',
+                'room_class' => 'Kelas 1',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 450000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'TV LED 32"', 'Kamar Mandi Dalam', 'Tirai Pembatas', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 11,
+                'bed_code' => 'K1-303-B',
+                'room_name' => 'Paviliun Maria 303',
+                'room_class' => 'Kelas 1',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Utama',
+                'daily_rate' => 450000,
+                'status' => 'cleaning',
+                'facilities' => ['AC', 'TV LED 32"', 'Kamar Mandi Dalam', 'Tirai Pembatas', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+
+            // === KELAS 2 (Ruang Santo Yosef - Lt. 3) ===
+            [
+                'id' => 12,
+                'bed_code' => 'K2-304-A',
+                'room_name' => 'Ruang Santo Yosef 304',
+                'room_class' => 'Kelas 2',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Barat',
+                'daily_rate' => 300000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Kamar Mandi Dalam', 'Tirai Sekat', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 13,
+                'bed_code' => 'K2-304-B',
+                'room_name' => 'Ruang Santo Yosef 304',
+                'room_class' => 'Kelas 2',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Barat',
+                'daily_rate' => 300000,
+                'status' => 'occupied',
+                'facilities' => ['AC', 'Kamar Mandi Dalam', 'Tirai Sekat', 'Oksigen Central', 'Nurse Call'],
+                'patient' => ['name' => 'Dewi Lestari', 'doctor_name' => 'dr. Ahmad Fauzi, Sp.PD'],
+            ],
+            [
+                'id' => 14,
+                'bed_code' => 'K2-304-C',
+                'room_name' => 'Ruang Santo Yosef 304',
+                'room_class' => 'Kelas 2',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Barat',
+                'daily_rate' => 300000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Kamar Mandi Dalam', 'Tirai Sekat', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 15,
+                'bed_code' => 'K2-305-A',
+                'room_name' => 'Ruang Santo Yosef 305',
+                'room_class' => 'Kelas 2',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Barat',
+                'daily_rate' => 300000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Kamar Mandi Dalam', 'Tirai Sekat', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 16,
+                'bed_code' => 'K2-305-B',
+                'room_name' => 'Ruang Santo Yosef 305',
+                'room_class' => 'Kelas 2',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Barat',
+                'daily_rate' => 300000,
+                'status' => 'ready',
+                'facilities' => ['AC', 'Kamar Mandi Dalam', 'Tirai Sekat', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 17,
+                'bed_code' => 'K2-305-C',
+                'room_name' => 'Ruang Santo Yosef 305',
+                'room_class' => 'Kelas 2',
+                'floor' => 'Lantai 3',
+                'building' => 'Gedung Rawat Inap Barat',
+                'daily_rate' => 300000,
+                'status' => 'maintenance',
+                'facilities' => ['AC', 'Kamar Mandi Dalam', 'Tirai Sekat', 'Oksigen Central', 'Nurse Call'],
+                'patient' => null,
+            ],
+
+            // === KELAS 3 (Ruang Santa Elisabeth - Lt. 4) ===
+            [
+                'id' => 18,
+                'bed_code' => 'K3-401-A',
+                'room_name' => 'Ruang Santa Elisabeth 401',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'ready',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 19,
+                'bed_code' => 'K3-401-B',
+                'room_name' => 'Ruang Santa Elisabeth 401',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'ready',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 20,
+                'bed_code' => 'K3-401-C',
+                'room_name' => 'Ruang Santa Elisabeth 401',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'occupied',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => ['name' => 'Agus Setiawan', 'doctor_name' => 'dr. Dewi Kartika, Sp.A'],
+            ],
+            [
+                'id' => 21,
+                'bed_code' => 'K3-401-D',
+                'room_name' => 'Ruang Santa Elisabeth 401',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'ready',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 22,
+                'bed_code' => 'K3-402-A',
+                'room_name' => 'Ruang Santa Elisabeth 402',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'ready',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 23,
+                'bed_code' => 'K3-402-B',
+                'room_name' => 'Ruang Santa Elisabeth 402',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'ready',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => null,
+            ],
+            [
+                'id' => 24,
+                'bed_code' => 'K3-402-C',
+                'room_name' => 'Ruang Santa Elisabeth 402',
+                'room_class' => 'Kelas 3',
+                'floor' => 'Lantai 4',
+                'building' => 'Gedung Rawat Inap Timur',
+                'daily_rate' => 180000,
+                'status' => 'cleaning',
+                'facilities' => ['AC Sentral', 'Kamar Mandi Luar/Bersama', 'Tirai Sekat', 'Oksigen Tabung/Wall', 'Nurse Call'],
+                'patient' => null,
+            ],
+
+            // === ICU (Unit Perawatan Intensif - Lt. 2) ===
+            [
+                'id' => 25,
+                'bed_code' => 'ICU-01',
+                'room_name' => 'ICU Sentral Bed 1',
+                'room_class' => 'ICU',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Medis Sentral',
+                'daily_rate' => 1500000,
+                'status' => 'occupied',
+                'facilities' => ['Ventilator', 'Bedside Monitor Hemodinamik', 'Defibrillator Ready', 'Syringe Pump', 'Oksigen Central Presisi'],
+                'patient' => ['name' => 'Rudi Hartono', 'doctor_name' => 'dr. Ahmad Fauzi, Sp.PD'],
+            ],
+            [
+                'id' => 26,
+                'bed_code' => 'ICU-02',
+                'room_name' => 'ICU Sentral Bed 2',
+                'room_class' => 'ICU',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Medis Sentral',
+                'daily_rate' => 1500000,
+                'status' => 'ready',
+                'facilities' => ['Ventilator', 'Bedside Monitor Hemodinamik', 'Defibrillator Ready', 'Syringe Pump', 'Oksigen Central Presisi'],
+                'patient' => null,
+            ],
+            [
+                'id' => 27,
+                'bed_code' => 'ICU-03',
+                'room_name' => 'ICU Sentral Bed 3',
+                'room_class' => 'ICU',
+                'floor' => 'Lantai 2',
+                'building' => 'Gedung Medis Sentral',
+                'daily_rate' => 1500000,
+                'status' => 'ready',
+                'facilities' => ['Ventilator', 'Bedside Monitor Hemodinamik', 'Defibrillator Ready', 'Syringe Pump', 'Oksigen Central Presisi'],
+                'patient' => null,
+            ],
+
+            // === ISOLASI (Ruang Isolasi Khusus - Lt. 1) ===
+            [
+                'id' => 28,
+                'bed_code' => 'ISO-101',
+                'room_name' => 'Isolasi Tekanan Negatif 1',
+                'room_class' => 'Isolasi',
+                'floor' => 'Lantai 1',
+                'building' => 'Gedung Perawatan Khusus',
+                'daily_rate' => 950000,
+                'status' => 'ready',
+                'facilities' => ['Tekanan Negatif', 'Filter HEPA', 'Anteroom Disinfeksi', 'Kamar Mandi Dalam', 'CCTV Monitor'],
+                'patient' => null,
+            ],
+            [
+                'id' => 29,
+                'bed_code' => 'ISO-102',
+                'room_name' => 'Isolasi Tekanan Negatif 2',
+                'room_class' => 'Isolasi',
+                'floor' => 'Lantai 1',
+                'building' => 'Gedung Perawatan Khusus',
+                'daily_rate' => 950000,
+                'status' => 'occupied',
+                'facilities' => ['Tekanan Negatif', 'Filter HEPA', 'Anteroom Disinfeksi', 'Kamar Mandi Dalam', 'CCTV Monitor'],
+                'patient' => ['name' => 'Fajar Nugraha', 'doctor_name' => 'dr. Ahmad Fauzi, Sp.PD'],
             ],
         ];
     }

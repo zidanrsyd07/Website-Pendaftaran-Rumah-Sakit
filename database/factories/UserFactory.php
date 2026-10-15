@@ -42,4 +42,24 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => User::ROLE_ADMIN]);
+    }
+
+    public function loketRawatJalan(): static
+    {
+        return $this->state(fn () => ['role' => User::ROLE_LOKET_RAWAT_JALAN]);
+    }
+
+    public function loketRawatInap(): static
+    {
+        return $this->state(fn () => ['role' => User::ROLE_LOKET_RAWAT_INAP]);
+    }
+
+    public function pasien(): static
+    {
+        return $this->state(fn () => ['role' => User::ROLE_PASIEN]);
+    }
 }

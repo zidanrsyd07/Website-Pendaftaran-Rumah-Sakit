@@ -37,9 +37,9 @@
 
         <nav class="main-nav">
             <a href="{{ route('home') }}" class="{{ $currentRoute === 'home' ? 'active' : '' }}">Beranda</a>
-            <a href="{{ route('about') }}" class="{{ $currentRoute === 'about' ? 'active' : '' }}">Tentang</a>
             <a href="{{ route('polyclinics.index') }}" class="{{ str_starts_with($currentRoute ?? '', 'polyclinics') ? 'active' : '' }}">Layanan</a>
             <a href="{{ route('doctors.index') }}" class="{{ str_starts_with($currentRoute ?? '', 'doctors') ? 'active' : '' }}">Dokter</a>
+            <a href="{{ route('registration.select-type') }}" class="{{ str_starts_with($currentRoute ?? '', 'registration') ? 'active' : '' }}">Pendaftaran</a>
             <a href="{{ route('queue.index') }}" class="{{ $currentRoute === 'queue.index' ? 'active' : '' }}">Antrian</a>
         </nav>
 
